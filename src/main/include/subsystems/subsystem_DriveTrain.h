@@ -16,7 +16,7 @@
 #include <frc/geometry/Pose2d.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
-
+#include <frc/controller/PIDController.h>
 #include <ctre/phoenix/sensors/WPI_Pigeon2.h>
 
 
@@ -24,22 +24,28 @@
 class subsystem_DriveTrain : public frc2::SubsystemBase {
  public:
   subsystem_DriveTrain();
-  void DriveTrain(units::meters_per_second_t xSpeed,
+  void SwerveDrive(units::meters_per_second_t xSpeed,
                    units::meters_per_second_t ySpeed,
                    units::radians_per_second_t zRot,
                    bool FieldRelative, 
                    bool IsOpenLoop);
-  void DriveTrain(frc::Translation2d Translation, 
+  void SwerveDrive(frc::Translation2d Translation, 
                   units::degrees_per_second_t Rotation,
                   bool FieldRelative, 
                   bool IsOpenLoop  );
   void SetModuleStates(wpi::array<frc::SwerveModuleState, 4> desiredStates);
+  void SwapOrientation();
+  double SetThrottle(double input);
+  void ChangeThrottle();
 
-  
   void ZeroGyro();
   void ResetOdometry(frc::Pose2d Pose);
   frc::Pose2d GetPose();
   frc::Rotation2d GetYaw();
+
+  void SetStationBalance();
+  units::meters_per_second_t CalculatePitch();
+  units::meters_per_second_t CalculateRoll();
 
 
   /**
@@ -59,6 +65,12 @@ class subsystem_DriveTrain : public frc2::SubsystemBase {
   SwerveModule m_BackRightModule;
 
   frc::SwerveDriveOdometry<4> m_Odometry;
+
+  double DegreeOfThrottle;
+
+  frc::PIDController m_PID;
+
+  bool StartBalance;
 
   
 

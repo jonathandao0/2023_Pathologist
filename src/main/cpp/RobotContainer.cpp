@@ -11,22 +11,28 @@
 
 RobotContainer::RobotContainer() {
   // Initialize all of your commands and subsystems here
-
+  m_Drive.SetDefaultCommand( command_DriveTeleop(&m_Drive,
+                                                       [this]{return XboxDrive.GetRawAxis(ControllerConstants::xboxLYAxis);},
+                                                       [this]{return XboxDrive.GetRawAxis(ControllerConstants::xboxLXAxis);},
+                                                       [this]{return XboxDrive.GetRawAxis(ControllerConstants::xboxRXAxis);},
+                                                       [this]{return SwerveConstants::IsFieldRelative;},
+                                                       [this]{return SwerveConstants::IsOpenLoop;}));
   // Configure the button bindings
   ConfigureBindings();
 }
 
 void RobotContainer::ConfigureBindings() {
-  // Configure your trigger bindings here
+  frc2::JoystickButton(&XboxDrive,
+                       frc::XboxController::Button::kB)
+      .OnTrue(command_StartStationBalance(&m_Drive).ToPtr());
 
-  // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-  frc2::Trigger([this] {
-    return m_subsystem.ExampleCondition();
-  }).OnTrue(ExampleCommand(&m_subsystem).ToPtr());
-
-  // Schedule `ExampleMethodCommand` when the Xbox controller's B button is
-  // pressed, cancelling on release.
-  m_driverController.B().WhileTrue(m_subsystem.ExampleMethodCommand());
+  frc2::JoystickButton(&XboxDrive,
+                        frc::XboxController::Button::kY)
+      .OnTrue(command_ZeroGyro(&m_Drive).ToPtr());
+  
+  frc2::JoystickButton(&XboxDrive,
+                       frc::XboxController::Button::kX)
+      .OnTrue(command_ShiftThrottle(&m_Drive).ToPtr());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

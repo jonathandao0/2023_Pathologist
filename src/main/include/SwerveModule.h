@@ -6,7 +6,6 @@
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
 #include <ctre/phoenix/sensors/WPI_CANCoder.h>
 #include <frc/kinematics/SwerveModulePosition.h>
-
 #include "Constants.h"
 #include "HardwareConfig.h"
 #include <units/angle.h>
@@ -19,16 +18,16 @@ class SwerveModule {
         frc::SwerveModuleState Optimize(frc::SwerveModuleState DesiredState, frc::Rotation2d CurrentAngle);
         frc::SwerveModuleState GetState();
         void SetDegrees(units::degree_t Degrees);
+        void SwapOrientation();   
         frc::SwerveModulePosition GetPosition();
-        
-        units::meter_t FalconToMeters(double wheelUnits);
+
+        units::meter_t FalconToMeters(double Counts);    
         units::degree_t FalconToDegrees(double Counts);
         double DegreesToFalcon(units::degree_t Degrees);
         double FalconToRPM(double VelocityCounts);
         double RPMToFalcon(double RPM);
         double getTurnCounts();
         units::degree_t getLastAngle();
-        
         units::meters_per_second_t FalconToMPS(double Velocitycounts);
         double MPSToFalcon(units::meters_per_second_t Velocity);
         

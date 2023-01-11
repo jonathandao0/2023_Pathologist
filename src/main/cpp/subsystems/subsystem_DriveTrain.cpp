@@ -9,29 +9,37 @@
 
 
 
-subsystem_DriveTrain::subsystem_DriveTrain():m_Gyro{SwerveConstants::CANCoderID}, 
-                                               m_FrontLeftModule{FrontLeftModule::Constants},
-                                               m_FrontRightModule{FrontRightModule::Constants},
-                                               m_BackLeftModule{BackLeftModule::Constants},
-                                               m_BackRightModule{BackRightModule::Constants},
-                                               m_Odometry{SwerveConstants::m_kinematics, 
-                                                          m_Gyro.GetRotation2d(),
-                                                          {m_FrontLeftModule.GetPosition(), 
-                                                                m_FrontRightModule.GetPosition(),
-                                                                m_BackLeftModule.GetPosition(), 
-                                                                m_BackRightModule.GetPosition()}}
+subsystem_DriveTrain::subsystem_DriveTrain():
+    m_Gyro{SwerveConstants::CANCoderID,  "DriveCANivore"}, 
+    m_FrontLeftModule{FrontLeftModule::Constants},
+    m_FrontRightModule{FrontRightModule::Constants},
+    m_BackLeftModule{BackLeftModule::Constants},
+    m_BackRightModule{BackRightModule::Constants},
+    m_Odometry{SwerveConstants::m_kinematics, 
+        m_Gyro.GetRotation2d(),
+        {m_FrontLeftModule.GetPosition(), 
+            m_FrontRightModule.GetPosition(),
+            m_BackLeftModule.GetPosition(),
+            m_BackRightModule.GetPosition()}}, 
+    m_PID{SwerveConstants::BalancekP, SwerveConstants::BalancekI, SwerveConstants::BalancekD}
 {
-
-
     m_Gyro.ConfigFactoryDefault();
     ZeroGyro();
+    m_PID.SetSetpoint(0.0);
+    m_PID.SetTolerance(2.0, 2.0);
+    DegreeOfThrottle = 1;
+    StartBalance = false;
 }
 
-void subsystem_DriveTrain::DriveTrain(units::meters_per_second_t xSpeed,
+void subsystem_DriveTrain::SwerveDrive(units::meters_per_second_t xSpeed,
                                         units::meters_per_second_t ySpeed,
                                         units::radians_per_second_t zRot,
                                         bool FieldRelative, 
                                         bool IsOpenLoop){
+    if(StartBalance){
+        // xSpeed += CalculateRoll();
+        // ySpeed += CalculatePitch();
+    }
     auto moduleStates = SwerveConstants::m_kinematics.ToSwerveModuleStates(
         FieldRelative ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(
                             xSpeed, ySpeed, zRot, GetYaw()
@@ -40,9 +48,9 @@ void subsystem_DriveTrain::DriveTrain(units::meters_per_second_t xSpeed,
     auto [FrontLeft, FrontRight, BackLeft, BackRight] = moduleStates;
     //auto [FrontRight, RearRight,]
 
-    m_FrontLeftModule.SetDesiredState(FrontLeft, IsOpenLoop);
+     m_FrontLeftModule.SetDesiredState(FrontLeft, IsOpenLoop);
     m_FrontRightModule.SetDesiredState(FrontRight, IsOpenLoop);
-    m_BackLeftModule.SetDesiredState(BackLeft, IsOpenLoop);
+     m_BackLeftModule.SetDesiredState(BackLeft, IsOpenLoop);
     m_BackRightModule.SetDesiredState(BackRight, IsOpenLoop);
 
     frc::SmartDashboard::SmartDashboard::PutNumber("Front Left Angle", FrontLeft.angle.Degrees().value() );
@@ -67,12 +75,29 @@ void subsystem_DriveTrain::SetModuleStates(wpi::array<frc::SwerveModuleState, 4>
   m_BackRightModule.SetDesiredState(desiredStates[3], false);
 }
 
+void subsystem_DriveTrain::SwapOrientation(){
+    m_FrontLeftModule.SwapOrientation();
+}
+
+double subsystem_DriveTrain::SetThrottle(double input){
+    return pow(input, DegreeOfThrottle);
+}
+
+void subsystem_DriveTrain::ChangeThrottle(){
+    if( DegreeOfThrottle == SwerveConstants::LinearThrottle){
+        DegreeOfThrottle = SwerveConstants::NonLinearThrottle;
+    }else{
+        DegreeOfThrottle = SwerveConstants::LinearThrottle;
+    }
+}
 
 void subsystem_DriveTrain::ResetOdometry(frc::Pose2d Pose){
-    m_Odometry.ResetPosition( m_Gyro.GetRotation2d(), {m_FrontLeftModule.GetPosition(), 
-                                                                m_FrontRightModule.GetPosition(),
-                                                                m_BackLeftModule.GetPosition(), 
-                                                                m_BackRightModule.GetPosition()},  Pose);
+    m_Odometry.ResetPosition(m_Gyro.GetRotation2d(),
+                            {m_FrontLeftModule.GetPosition(), 
+                                m_FrontRightModule.GetPosition(),
+                                m_BackLeftModule.GetPosition(),
+                                m_BackRightModule.GetPosition()},
+                            Pose);
 }
 
 frc::Pose2d subsystem_DriveTrain::GetPose(){
@@ -85,7 +110,18 @@ frc::Rotation2d subsystem_DriveTrain::GetYaw(){
     return (SwerveConstants::InvertGyro) ? frc::Rotation2d{360_deg - Yaw}: frc::Rotation2d{Yaw}; 
 }
 
+units::meters_per_second_t subsystem_DriveTrain::CalculatePitch(){
+    
+    return units::meters_per_second_t{m_PID.Calculate(m_Gyro.GetPitch())};
+}
 
+units::meters_per_second_t subsystem_DriveTrain::CalculateRoll(){
+    return units::meters_per_second_t{m_PID.Calculate(m_Gyro.GetRoll())};
+}
+
+void subsystem_DriveTrain::SetStationBalance(){
+    StartBalance = !StartBalance;
+}
 
 void subsystem_DriveTrain::ZeroGyro(){
     m_Gyro.SetYaw(0);
@@ -100,8 +136,9 @@ void subsystem_DriveTrain::Periodic() {
 
     m_Odometry.Update(m_Gyro.GetRotation2d(),
                       {m_FrontLeftModule.GetPosition(), 
-                        m_FrontRightModule.GetPosition(),
-                        m_BackLeftModule.GetPosition(), 
-                        m_BackRightModule.GetPosition()} );
+                                m_FrontRightModule.GetPosition(),
+                                m_BackLeftModule.GetPosition(),
+                                m_BackRightModule.GetPosition()} );
 
 }
+

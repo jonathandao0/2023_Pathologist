@@ -33,7 +33,10 @@ SwerveModule::SwerveModule(const double Module[] ):
     m_DriveMotor.EnableVoltageCompensation(true);
 
     m_LastAngle = GetState().angle.Degrees();
+    
 }
+
+
 
 void SwerveModule::SetDegrees(units::degree_t Degrees){
 
@@ -44,7 +47,9 @@ void SwerveModule::SetDegrees(units::degree_t Degrees){
 double SwerveModule::getTurnCounts(){
     return m_AngleMotor.GetSelectedSensorPosition();
 }
-
+void SwerveModule::SwapOrientation(){
+    m_DriveMotor.SetInverted(!m_DriveMotor.GetInverted());
+}
 
 void SwerveModule::SetDesiredState(frc::SwerveModuleState& DesiredState, bool IsOpenLoop){
     DesiredState = Optimize(DesiredState, GetState().angle);
@@ -93,20 +98,20 @@ frc::SwerveModuleState SwerveModule::Optimize(frc::SwerveModuleState DesiredStat
     return  {TargetSpeed, TargetAngle};
 }
 
-frc::SwerveModulePosition SwerveModule::GetPosition(){
-    units::meter_t Distance{FalconToMeters(m_DriveMotor.GetSelectedSensorPosition())};
-    frc::Rotation2d Angle{FalconToDegrees( m_AngleMotor.GetSelectedSensorPosition())};
-    return {Distance, Angle};
-}
-
-units::meter_t SwerveModule::FalconToMeters(double wheelUnits){
-    double rotations = wheelUnits/2048;
-    units::meter_t meters = rotations * SwerveConstants::WheelCircumference/SwerveConstants::DriveGearRatio;
-    return meters;
-}
 
 frc::Rotation2d SwerveModule::GetCANCoder(){
-    return frc::Rotation2d(units::degree_t(m_AngleEncoder.GetAbsolutePosition()));
+    return frc::Rotation2d( units::degree_t( m_AngleEncoder.GetAbsolutePosition() ) );
+}
+
+frc::SwerveModulePosition SwerveModule::GetPosition(){
+    units::meter_t Distance{ FalconToMeters(m_DriveMotor.GetSelectedSensorPosition())};
+    frc::Rotation2d Angle{FalconToDegrees( m_AngleMotor.GetSelectedSensorPosition()) };
+    return {Distance, Angle};
+
+}
+
+units::meter_t SwerveModule::FalconToMeters(double Counts){
+    return units::meter_t{ (Counts * SwerveConstants::WheelCircumference) / ( 2048 * SwerveConstants::DriveGearRatio)};
 }
 
 frc::SwerveModuleState SwerveModule::GetState(){

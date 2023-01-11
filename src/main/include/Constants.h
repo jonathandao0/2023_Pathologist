@@ -4,7 +4,6 @@
 
 #pragma once
 #include <units/length.h>
-#include <units/base.h>
 #include <units/voltage.h>
 #include <units/velocity.h>
 #include <units/time.h>
@@ -13,6 +12,7 @@
 
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/trajectory/TrapezoidProfile.h>
+
 
 
 
@@ -29,7 +29,7 @@ namespace ControllerConstants{
     constexpr double Deadband = 0.2;
     
     constexpr int XboxDriveID = 0;
-    constexpr int XboxYaperatorID = 0;
+    constexpr int XboxYaperatorID = 1;
 
     constexpr int xboxLXAxis = 0;
     constexpr int xboxLYAxis = 1;
@@ -53,6 +53,11 @@ namespace ControllerConstants{
 }
 
 namespace SwerveConstants{
+
+    constexpr int BalancekP = 0;
+    constexpr int BalancekI = 0;
+    constexpr int BalancekD = 0;
+
     constexpr int CANCoderID = 12; 
     constexpr bool InvertGyro = true;
 
@@ -63,17 +68,13 @@ namespace SwerveConstants{
     constexpr double DriveGearRatio = 6.75;
     constexpr double AngleGearRatio = 150.0 / 7.0;
 
-    // typedef Meter units::base_unit<0>
-
-
-    // sdfsd
     
-    constexpr units::meter_t WheelCircumference{ 0.1016 * std::numbers::pi  };
-    
-    const frc::Translation2d m_FrontLeft{14_in, -14_in };
-    const frc::Translation2d m_FrontRight{14_in, 14_in};
-    const frc::Translation2d m_BackLeft{-14_in, -14_in};
-    const frc::Translation2d m_BackRight{-14_in, 14_in};
+    constexpr units::meter_t WheelCircumference{ 4.0_in * M_PI  };
+
+    const frc::Translation2d m_FrontLeft{14.0_in, -14.0_in};
+    const frc::Translation2d m_FrontRight{14.0_in, 14.0_in};
+    const frc::Translation2d m_BackLeft{-14.0_in, -14.0_in};
+    const frc::Translation2d m_BackRight{-14.0_in, 14.0_in};
 
     const frc::SwerveDriveKinematics<4> m_kinematics{m_FrontLeft,
                                                m_FrontRight,
@@ -81,20 +82,21 @@ namespace SwerveConstants{
                                                m_BackRight};
 
 
-
+    constexpr double LinearThrottle = 1;
+    constexpr double NonLinearThrottle = 2;
 
     /*setting up correct units for the simepleMotorFeedforward KS gain*/
-    constexpr units::volt_t DriveKS{0.566};
+    constexpr units::volt_t DriveKS{0.69719};
 
-    constexpr units::volt_t VoltageKV{0.678};
+    constexpr units::volt_t VoltageKV{2.2575};
     constexpr units::foot_t FeetKV{1.0};
     constexpr units::second_t TimeKV{1.0};
     /*Setting up correct units for the simpleMotorFeedforward KV gain
-    Change VoltageKV when wanting to change the KV gain*/
+    Change VoltageKV when wanting to change 
+    the KV gain*/
     constexpr auto DriveKV = VoltageKV * TimeKV / FeetKV;
-    
-    
-    constexpr units::volt_t VoltageKA{0.039};
+
+    constexpr units::volt_t VoltageKA{0.35831};
     constexpr units::foot_t FeetKA{1.0};
     constexpr units::second_t TimeKA{1.0};
     /*Setting up correct units for the simpleMotorFeedforward KA gain
@@ -107,29 +109,29 @@ namespace SwerveConstants{
     
 
     /*Swerve Angle Motor PID gains*/
-    constexpr double AngleKP = 0.1;
+    constexpr double AngleKP = 0.4;
     constexpr double AngleKI = 0.0;
-    constexpr double AngleKD = 0.0;
+    constexpr double AngleKD = 0.004;
     constexpr double AngleKF = 0.0;
 
     /*Swerve Angle Current Limit Config*/
     constexpr bool AngleEnableCurrentLimit = true;
-    constexpr int AngleContinuousCurrentLimit = 25;
+    constexpr int AngleContinuousCurrentLimit = 20;
     constexpr int AnglePeakCurrentLimit = 40;
     constexpr double AnglePeakCurrentDuration = 0.1;
 
 
     
     /*Swerve Drive Motor PID gains*/
-    constexpr double DriveKP = 0.01;
+    constexpr double DriveKP = 0.2;
     constexpr double DriveKI = 0.0;
-    constexpr double DriveKD = 0.0;
+    constexpr double DriveKD = 0.002;
     constexpr double DriveKF = 0.0;
 
     /*Swerve Drive Current Limit Config*/
     constexpr bool DriveEnableCurrentLimit = true;
-    constexpr int DriveContinuousCurrentLimit = 35;
-    constexpr int DrivePeakCurrentLimit = 60;
+    constexpr int DriveContinuousCurrentLimit = 20;
+    constexpr int DrivePeakCurrentLimit = 40;
     constexpr double DrivePeakCurrentDuration = 0.1;
 
 
@@ -142,7 +144,7 @@ namespace SwerveConstants{
     constexpr units::meters_per_second_t MaxSpeed{3};
     constexpr units::degrees_per_second_t MaxAngularVelocity{360};
 
-    constexpr bool IsFieldRelative = false;
+    constexpr bool IsFieldRelative = true;
     constexpr bool IsOpenLoop = false;  
 }
 
@@ -179,7 +181,7 @@ namespace BackRightModule{
 }
 
 namespace AutoConstants{
-    constexpr units::radian_t PI {std::numbers::pi};
+    constexpr units::radian_t PI {M_PI};
     constexpr units::meters_per_second_t MaxSpeed{ 0 };
     constexpr units::meters_per_second_squared_t MaxAccel{ 0 };
     constexpr units::radians_per_second_t MaxAngularSpeed{ 0 };
