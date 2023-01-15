@@ -12,3 +12,8 @@ frc2::CommandPtr autos::ExampleAuto(ExampleSubsystem* subsystem) {
   return frc2::cmd::Sequence(subsystem->ExampleMethodCommand(),
                              ExampleCommand(subsystem).ToPtr());
 }
+
+
+frc2::CommandPtr autos::TestAuto(subsystem_DriveTrain* DriveTrain, bool ToReset){
+  return frc2::cmd::Sequence(command_DriveAuton(DriveTrain, ToReset).ToPtr());
+}

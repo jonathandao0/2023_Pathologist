@@ -14,6 +14,7 @@
 #include "commands/command_ShiftThrottle.h"
 #include "commands/command_ZeroGyro.h"
 #include "commands/command_StartStationBalance.h"
+#include "commands/command_DriveAuton.h"
 
 #include "frc/XboxController.h"
 #include "frc2/command/button/JoystickButton.h"
@@ -30,6 +31,7 @@ class RobotContainer {
   RobotContainer();
 
   frc2::CommandPtr GetAutonomousCommand();
+  
 
  private:
   // Replace with CommandPS4Controller or CommandJoystick if needed

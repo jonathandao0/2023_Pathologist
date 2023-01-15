@@ -3,9 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "RobotContainer.h"
-
 #include <frc2/command/button/Trigger.h>
-
 #include "commands/Autos.h"
 #include "commands/ExampleCommand.h"
 
@@ -33,9 +31,13 @@ void RobotContainer::ConfigureBindings() {
   frc2::JoystickButton(&XboxDrive,
                        frc::XboxController::Button::kX)
       .OnTrue(command_ShiftThrottle(&m_Drive).ToPtr());
+  
+  frc2::JoystickButton(&XboxDrive, frc::XboxController::Button::kA).OnTrue(command_DriveAuton(&m_Drive, false).ToPtr());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
   // An example command will be run in autonomous
-  return autos::ExampleAuto(&m_subsystem);
+  // return autos::ExampleAuto(&m_subsystem);
+  return autos::TestAuto(&m_Drive, false);
 }
+ 

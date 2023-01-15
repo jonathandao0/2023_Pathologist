@@ -82,6 +82,18 @@ namespace SwerveConstants{
                                                m_BackRight};
 
 
+    const frc::Translation2d m_frontLeftLocation{+0.381_m, +0.381_m};
+    const frc::Translation2d m_frontRightLocation{+0.381_m, -0.381_m};
+    const frc::Translation2d m_backLeftLocation{-0.381_m, +0.381_m};
+    const frc::Translation2d m_backRightLocation{-0.381_m, -0.381_m};
+
+
+
+    const frc::SwerveDriveKinematics<4> m_kinematicsTwo{
+      m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation,
+      m_backRightLocation};
+
+
     constexpr double LinearThrottle = 1;
     constexpr double NonLinearThrottle = 2;
 
@@ -153,7 +165,7 @@ namespace FrontLeftModule{
     constexpr int DriveMotorID = 0;
     constexpr int AngleMotorID = 1;
     constexpr int CanCoderID = 2;
-    constexpr double AngleOffset = -54.3;
+    constexpr double AngleOffset = 6.4;
     const double Constants[4] = { DriveMotorID, AngleMotorID, CanCoderID, AngleOffset };
 }
 
@@ -181,7 +193,6 @@ namespace BackRightModule{
 }
 
 namespace AutoConstants{
-    constexpr units::radian_t PI {M_PI};
     constexpr units::meters_per_second_t MaxSpeed{ 0 };
     constexpr units::meters_per_second_squared_t MaxAccel{ 0 };
     constexpr units::radians_per_second_t MaxAngularSpeed{ 0 };
