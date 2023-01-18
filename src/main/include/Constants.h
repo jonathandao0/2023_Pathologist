@@ -121,7 +121,7 @@ namespace SwerveConstants{
     
 
     /*Swerve Angle Motor PID gains*/
-    constexpr double AngleKP = 0.4;
+    constexpr double AngleKP = 0.2;
     constexpr double AngleKI = 0.0;
     constexpr double AngleKD = 0.004;
     constexpr double AngleKF = 0.0;
@@ -135,7 +135,7 @@ namespace SwerveConstants{
 
     
     /*Swerve Drive Motor PID gains*/
-    constexpr double DriveKP = 0.2;
+    constexpr double DriveKP = 0.1;
     constexpr double DriveKI = 0.0;
     constexpr double DriveKD = 0.002;
     constexpr double DriveKF = 0.0;
