@@ -7,8 +7,10 @@
 subsystem_Arm::subsystem_Arm() : 
 m_BottomArmMotor{ArmConstants::bottomArmMotorID, rev::CANSparkMax::MotorType::kBrushless},
 m_TopArmMotor{ArmConstants::topArmMotorID, rev::CANSparkMax::MotorType::kBrushless},
+m_IntakeTiltMotor{ArmConstants::intakeTiltMotorID, rev::CANSparkMax::MotorType::kBrushless},
 m_BottomArmPID{m_BottomArmMotor.GetPIDController()},
-m_TopArmPID{m_TopArmMotor.GetPIDController()}
+m_TopArmPID{m_TopArmMotor.GetPIDController()},
+m_IntakeTiltPID{m_IntakeTiltMotor.GetPIDController()}
 {
     m_BottomArmPID.SetP(ArmConstants::kBottomP);
     m_BottomArmPID.SetD(ArmConstants::kBottomD);
@@ -17,13 +19,15 @@ m_TopArmPID{m_TopArmMotor.GetPIDController()}
 }
 
 double subsystem_Arm::CalculateBottomArmAngle(double x, double y){
-    double topAngle = CalculateTopArmAngle(x, y);
-    return atan(y / x) - atan((ArmConstants::topJointLength * sin(topAngle)) 
+    topAngle = CalculateTopArmAngle(x, y);
+    bottomAngle = atan(y / x) - atan((ArmConstants::topJointLength * sin(topAngle)) 
     / (ArmConstants::bottomJointLength + (ArmConstants::topJointLength * cos(topAngle))));
+    return bottomAngle;
 }
 double subsystem_Arm::CalculateTopArmAngle(double x, double y){
-    return -acos((pow(x,2) + pow(y,2) - pow(ArmConstants::bottomJointLength,2) - pow(ArmConstants::topJointLength,2))
+    topAngle = -acos((pow(x,2) + pow(y,2) - pow(ArmConstants::bottomJointLength,2) - pow(ArmConstants::topJointLength,2))
     /(2*ArmConstants::topJointLength*ArmConstants::bottomJointLength));
+    return topAngle;
 }
 
 void subsystem_Arm::MoveArm(double x, double y){
@@ -40,7 +44,12 @@ void subsystem_Arm::MoveArm(double x, double y){
     }
 }
 
+void subsystem_Arm::SetIntakeAngle(double angle)
+{
+    double adjustedAngle = angle - intakeAngleOffset;
+    m_IntakeTiltPID.SetReference(adjustedAngle, rev::ControlType::kPosition, 0); 
+}
 
 void subsystem_Arm::Periodic() {
-
+    intakeAngleOffset = bottomAngle * ArmConstants::intakeAngleConversion; /* - some constant bleh */
 }
