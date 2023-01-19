@@ -9,7 +9,7 @@
 #include "commands/Autos.h"
 #include "commands/ExampleCommand.h"
 
-RobotContainer::RobotContainer() {
+RobotContainer::RobotContainer(): m_MoveArm(&m_Arm) {
   // Initialize all of your commands and subsystems here
 
   // Configure the button bindings
@@ -19,6 +19,10 @@ RobotContainer::RobotContainer() {
 void RobotContainer::ConfigureBindings() {
   // Configure your trigger bindings here
 
+  frc2::JoystickButton(&controller, 
+  frc::XboxController::Button::kA)
+  .OnTrue(command_MoveArm(&m_Arm).ToPtr());
+
   // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
   frc2::Trigger([this] {
     return m_subsystem.ExampleCondition();
@@ -26,7 +30,7 @@ void RobotContainer::ConfigureBindings() {
 
   // Schedule `ExampleMethodCommand` when the Xbox controller's B button is
   // pressed, cancelling on release.
-  m_driverController.B().WhileTrue(m_subsystem.ExampleMethodCommand());
+  // m_driverController.B().WhileTrue(m_subsystem.ExampleMethodCommand());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

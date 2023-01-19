@@ -14,18 +14,20 @@
  * they are needed.
  */
 namespace ArmConstants {
-    const int bottomArmMotorID = 0;
+    const int bottomArmMotorID = 4;
     const int topArmMotorID = 0;
 
-    const double kBottomP = 0.0;
-    const double kBottomD = 0.0;
+    const double kBottomP = 0.1;
+    const double kBottomD = 0.1;
 
     const double kTopP = 0.0;
     const double kTopD = 0.0;
 
+    const double radiansToEncoder = 0.17825353626;
+
     const double totalArmLength = 0.0;
-    const double bottomJointLength = 0.0;
-    const double topJointLength = 0.0;
+    const double bottomJointLength = 10.0;
+    const double topJointLength = 10.0;
 
     const double xOriginAdjustment = 0.0;
     const double yOriginAdjustment = 0.0;
