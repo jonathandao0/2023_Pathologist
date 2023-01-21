@@ -33,9 +33,10 @@ double subsystem_Arm::CalculateTopArmAngle(double x, double y){
 void subsystem_Arm::MoveArm(double x, double y){
     double adjustedX = x + ArmConstants::xOriginAdjustment;
     double adjustedY = y + ArmConstants::yOriginAdjustment; 
-    if(/*adjustedX <= ArmConstants::totalArmLength && adjustedY <= ArmConstants::totalArmLength*/ true){
-        double convertedBottom = CalculateBottomArmAngle(adjustedX, adjustedY) * ArmConstants::radiansToEncoder;
-        double convertedTop = CalculateTopArmAngle(adjustedX, adjustedY) * ArmConstants::radiansToEncoder;
+    if(adjustedX <= ArmConstants::totalArmLength && adjustedY <= ArmConstants::totalArmLength){
+        int bottom = CalculateBottomArmAngle(adjustedX, adjustedY);
+        double convertedTop = (CalculateTopArmAngle(adjustedX, adjustedY) - bottom) * ArmConstants::radiansToEncoder;
+        double convertedBottom = bottom * ArmConstants::radiansToEncoder;
 
         m_BottomArmPID.SetReference(convertedBottom, rev::ControlType::kPosition, 0);
         m_TopArmPID.SetReference(convertedTop, rev::ControlType::kPosition, 0);
@@ -51,5 +52,5 @@ void subsystem_Arm::SetIntakeAngle(double angle)
 }
 
 void subsystem_Arm::Periodic() {
-    intakeAngleOffset = bottomAngle * ArmConstants::intakeAngleConversion; /* - some constant bleh */
+    intakeAngleOffset = topAngle * ArmConstants::intakeAngleConversion; /* - some constant bleh */
 }
