@@ -14,7 +14,9 @@
 #include <frc/trajectory/TrapezoidProfile.h>
 #include <frc/controller/PIDController.h>
 
-
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 
 
@@ -73,10 +75,10 @@ namespace SwerveConstants{
     
     constexpr units::meter_t WheelCircumference{ 4.0_in * M_PI  };
 
-    const frc::Translation2d m_FrontLeft{14.0_in, -14.0_in};
-    const frc::Translation2d m_FrontRight{14.0_in, 14.0_in};
-    const frc::Translation2d m_BackLeft{-14.0_in, -14.0_in};
-    const frc::Translation2d m_BackRight{-14.0_in, 14.0_in};
+    const frc::Translation2d m_FrontLeft{14.0_in, 14.0_in};
+    const frc::Translation2d m_FrontRight{14.0_in, -14.0_in};
+    const frc::Translation2d m_BackLeft{-14.0_in, 14.0_in};
+    const frc::Translation2d m_BackRight{-14.0_in, -14.0_in};
 
     const frc::SwerveDriveKinematics<4> m_kinematics{m_FrontLeft,
                                                m_FrontRight,
@@ -135,7 +137,7 @@ namespace SwerveConstants{
     constexpr double DrivePeakCurrentDuration = 0.1;
 
     /*Motor Inverts Config*/
-    constexpr bool AngleMotorInvert = false;
+    constexpr bool AngleMotorInvert = true;
     constexpr bool DriveMotorInvert = false;
 
     /* Swerve Profiling values */

@@ -6,9 +6,14 @@
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
 #include <ctre/phoenix/sensors/WPI_CANCoder.h>
 #include <frc/kinematics/SwerveModulePosition.h>
+#include <frc/simulation/FlywheelSim.h>
+#include <frc/system/plant/LinearSystemId.h>
+#include <units/angle.h>
+#include <units/angular_acceleration.h>
+#include <units/angular_velocity.h>
+
 #include "Constants.h"
 #include "HardwareConfig.h"
-#include <units/angle.h>
 
 class SwerveModule {
     public:
@@ -32,6 +37,7 @@ class SwerveModule {
         double MPSToFalcon(units::meters_per_second_t Velocity);
         
 
+        void SimulationPeriodic();
     private:
         void resetToAbsolute();
         
@@ -45,6 +51,18 @@ class SwerveModule {
         HardwareConfig m_Settings;
 
 
-
-
+        frc::sim::FlywheelSim m_driveMotorSim{
+            frc::LinearSystemId::IdentifyVelocitySystem<units::radian>(1.5_V / 1_rad_per_s, 0.6_V / 1_rad_per_s_sq),
+            frc::DCMotor::Falcon500(1),
+            SwerveConstants::DriveGearRatio
+            };
+        frc::sim::FlywheelSim m_angleMotorSim{
+            frc::LinearSystemId::IdentifyVelocitySystem<units::radians>(0.1_V / 1_rad_per_s, 0.0001_V / 1_rad_per_s_sq),
+            frc::DCMotor::Falcon500(1),
+            SwerveConstants::AngleGearRatio
+            };
+        double m_drivePercentOutput = 0;
+        double m_anglePercentOutput = 0;
+        units::radian_t m_driveMotorSimDistance{0};
+        units::radian_t m_angleMotorSimDistance{0};
 };

@@ -6,7 +6,7 @@
 
 #include "subsystems/subsystem_DriveTrain.h"
 #include "frc/smartdashboard/SmartDashboard.h"
-
+#include "ctre/phoenix/unmanaged/Unmanaged.h"
 
 
 subsystem_DriveTrain::subsystem_DriveTrain():
@@ -28,6 +28,8 @@ subsystem_DriveTrain::subsystem_DriveTrain():
     m_PID.SetTolerance(5.0);
     DegreeOfThrottle = 1;
     StartBalance = false;
+
+    frc::SmartDashboard::PutData("Field", &m_field);
 }
 
 void subsystem_DriveTrain::SwerveDrive(units::meters_per_second_t xSpeed,
@@ -131,7 +133,7 @@ void subsystem_DriveTrain::ZeroGyro(){
 }
 
 units::radians_per_second_t subsystem_DriveTrain::GetAngularVelocity(){
-
+    return units::radians_per_second_t{0};
 }
 
 
@@ -153,3 +155,24 @@ void subsystem_DriveTrain::Periodic() {
 
 }
 
+void subsystem_DriveTrain::SimulationPeriodic() {
+    m_FrontLeftModule.SimulationPeriodic();
+    m_FrontRightModule.SimulationPeriodic();
+    m_BackLeftModule.SimulationPeriodic();
+    m_BackRightModule.SimulationPeriodic();
+
+    auto chassisSpeed = SwerveConstants::m_kinematics.ToChassisSpeeds(
+        m_FrontLeftModule.GetState(),
+        m_FrontRightModule.GetState(),
+        m_BackLeftModule.GetState(),
+        m_BackRightModule.GetState()
+    );
+
+    m_simYaw += chassisSpeed.omega * 0.02_s;
+    ctre::phoenix::unmanaged::Unmanaged::FeedEnable(20);
+
+    units::degree_t yawDegrees{m_simYaw};
+    m_Gyro.GetSimCollection().SetRawHeading(-yawDegrees.value());
+    
+    m_field.SetRobotPose(GetPose());
+}

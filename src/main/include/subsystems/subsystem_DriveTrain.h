@@ -19,7 +19,8 @@
 #include <frc/geometry/Translation2d.h>
 #include <frc/controller/PIDController.h>
 #include <ctre/phoenix/sensors/WPI_Pigeon2.h>
-
+#include <units/angle.h>
+#include <frc/smartdashboard/Field2d.h>
 
 
 class subsystem_DriveTrain : public frc2::SubsystemBase {
@@ -56,6 +57,7 @@ class subsystem_DriveTrain : public frc2::SubsystemBase {
    * Will be called periodically whenever the CommandScheduler runs.
    */
   void Periodic() override;
+  void SimulationPeriodic() override;
 
  private:
   // Components (e.g. motor controllers and sensors) should generally be
@@ -87,6 +89,8 @@ class subsystem_DriveTrain : public frc2::SubsystemBase {
 
   
   //std::vector<SwerveModule> m_Mods;
+  frc::Field2d m_field;
+  units::radian_t m_simYaw{0};
                            
   
 };

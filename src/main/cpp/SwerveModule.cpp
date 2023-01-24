@@ -1,5 +1,8 @@
+#include <frc/RobotBase.h>
+
 #include "SwerveModule.h"
 #include "frc/smartdashboard/SmartDashboard.h"
+#include "ctre/phoenix/unmanaged/Unmanaged.h"
 
 SwerveModule::SwerveModule(const double Module[] ):
                                                  m_DriveMotor{ (int)Module[0]},
@@ -11,13 +14,14 @@ SwerveModule::SwerveModule(const double Module[] ):
     //Config Angle Encoder
     m_AngleEncoder.ConfigFactoryDefault();
     m_AngleEncoder.ConfigAllSettings(m_Settings.SwerveCanCoderConfig);
-    m_AngleEncoder.ConfigMagnetOffset(m_AngleOffset.value());
+    if(frc::RobotBase::IsReal)
+        m_AngleEncoder.ConfigMagnetOffset(m_AngleOffset.value());
     //Config Angle Motor
     m_AngleMotor.ConfigFactoryDefault();
     m_AngleMotor.ConfigAllSettings(m_Settings.SwerveAngleFXConfig);
     m_AngleMotor.SetInverted(SwerveConstants::AngleMotorInvert);
     m_AngleMotor.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
-     m_AngleMotor.SetSelectedSensorPosition((DegreesToFalcon(0_deg - GetCANCoder().Degrees()) ));
+    m_AngleMotor.SetSelectedSensorPosition((DegreesToFalcon(0_deg - GetCANCoder().Degrees()) ));
 
 
 
@@ -67,6 +71,9 @@ void SwerveModule::SetDesiredState(frc::SwerveModuleState& DesiredState, bool Is
 
     m_AngleMotor.Set( ctre::phoenix::motorcontrol::ControlMode::Position, DegreesToFalcon(Angle) );
     m_LastAngle = Angle;
+
+    m_drivePercentOutput = m_DriveMotor.GetMotorOutputPercent();
+    m_anglePercentOutput = m_AngleMotor.GetMotorOutputPercent();
 }
 
 units::degree_t SwerveModule::getLastAngle(){
@@ -150,4 +157,23 @@ double SwerveModule::MPSToFalcon(units::meters_per_second_t Velocity){
     double WheelRPM = ( Velocity.value() * 60 ) / SwerveConstants::WheelCircumference.value();
     double WheelVelocity = RPMToFalcon(WheelRPM);
     return WheelVelocity;
+}
+
+void SwerveModule::SimulationPeriodic() {
+    m_driveMotorSim.SetInputVoltage(m_drivePercentOutput * 12_V);
+    m_angleMotorSim.SetInputVoltage(m_anglePercentOutput * 12_V);
+
+    m_driveMotorSim.Update(0.02_s);
+    m_angleMotorSim.Update(0.02_s);
+
+    ctre::phoenix::unmanaged::Unmanaged::FeedEnable(20);
+
+    m_driveMotorSimDistance += m_driveMotorSim.GetAngularVelocity() * 0.02_s;
+    m_angleMotorSimDistance += m_angleMotorSim.GetAngularVelocity() * 0.02_s;
+
+    m_DriveMotor.GetSimCollection().SetIntegratedSensorRawPosition((int)(m_driveMotorSimDistance / (360.0/ (2048.0 * SwerveConstants::DriveGearRatio))));
+    m_DriveMotor.GetSimCollection().SetIntegratedSensorVelocity((int)(m_driveMotorSim.GetAngularVelocity()  / (360.0 / (2048.0 * SwerveConstants::DriveGearRatio) * 10.0)));
+
+    m_AngleMotor.GetSimCollection().SetIntegratedSensorRawPosition((int)(m_angleMotorSimDistance / (360.0/ (2048.0 * SwerveConstants::AngleGearRatio))));
+    m_AngleMotor.GetSimCollection().SetIntegratedSensorVelocity((int)(m_angleMotorSim.GetAngularVelocity()  / (360.0 / (2048.0 * SwerveConstants::AngleGearRatio) * 10.0)));
 }
